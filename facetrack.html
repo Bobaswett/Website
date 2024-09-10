@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Generic Page - Massively by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="assets/css/custom.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+		
+		
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">John Kostas</a>
+					</header>
+
+				<!-- Nav -->
+				<nav id="nav">
+					<ul class="links">
+						<li><a href="index.html">Home</a></li>
+					
+						
+						<li class="dropdown">
+							<a href="#main">Projects</a>
+							<ul class="dropdown-content">
+								<li><a href="4wheeled.html">4-Wheel Hand gestures</a></li>
+								<li><a href="nlp.html">Article NLP</a></li>
+								<li><a href="alz.html">Alzheimers Prediction</a></li>
+								<li><a href="facetrack.html">4 Wheel Face Tracking</a></li>
+								<li><a href="jetson.html">Jetson Nano Mini Projects</a></li>
+								<li><a href="arduino.html">Esp32/Arduino Mini Projects</a></li>
+								<li><a href="website.html">This Website</a></li>
+							</ul>
+						
+						</li>
+						<li><a href="about.html">Professional Experience</a></li>
+					</ul>
+					<ul class="icons">
+						<li><a target = "_blank" rel = "noopener nonreferrer" href = "https://github.com/Bobaswett/" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">April 25, 2017</span>
+									<h1>Face Recognition, Tracking, and Voice Response with 3d Printed Robot, Arduino Nano, and Jetson Nano<br />
+										<li><a target = "_blank" rel = "noopener nonreferrer" href = "https://github.com/Bobaswett/Facetracking" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+									</h1>
+									<p>This robot was made using a Jetson Nano and Arduino Nano that communicate through a UART connection. The Jetson Nano is also equipped with Servos that move the camera to track the user's face. The Servos are controlled by a PWM board through an I2C connection from the Jetson Nano.</p>
+								</header>
+								<iframe width="560" height="315" src="https://www.youtube.com/embed/oFOwtV-pgoY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+								<h2>Face Training Code</h2>
+<pre><code class="language-python">
+#Import necessary libraries
+	import face_recognition
+import cv2
+import os
+import pickle 
+
+#Create Arrays
+Encodings = []
+Names = []
+
+#Set file location for images
+image_dir = "/home/jlk/Desktop/pypro/faceRecognizer/demoImages/known"
+
+#Iterate through images
+for root, dirs, files in os.walk(image_dir):
+	for file in files:
+		path = os.path.join(root,file)
+		name = os.path.splitext(file)[0]
+			
+		#Train model on images of different people based on names of the file 
+		#files must match names of users to be recognized
+		person=face_recognition.load_image_file(path)
+		encoding = face_recognition.face_encodings(person)[0]
+
+		Encodings.append(encoding)
+		Names.append(name)
+		# print(Names) 
+#Pickle trained
+with open('train.pkl','wb') as f:
+	pickle.dump(Names,f)
+	pickle.dump(Encodings,f)
+</code></pre>
+								<p>Here I used a library, openCV, os, and pickle to train a model to recognize various faces. The plan is to have the robot recognize my face and then say hello before beginning to track my movement.</p>
+								<h2>Main File</h2>
+
+
+<pre><code class="language-python">
+import face_recognition
+import cv2
+import os
+import pickle
+import time
+import pyttsx3
+from adafruit_servokit import ServoKit
+
+kit = ServoKit(channels = 16)
+
+Encodings = []
+Names = []
+
+with open('train.pkl','rb') as f:
+	Names = pickle.load(f)
+	Encodings = pickle.load(f)
+font = cv2.FONT_HERSHEY_COMPLEX
+
+j = 1
+
+
+cam = cv2.VideoCapture(0)
+width = cam.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = cam.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+
+def speak(text):
+	engine = pyttsx3.init()
+	engine.say(text)
+	engine.runAndWait()
+pan = 90
+tilt = 90
+
+
+kit.servo[0].angle = pan
+kit.servo[1].angle = tilt
+
+
+
+while True:
+	_, frame = cam.read()
+	frameSmall = cv2.resize(frame,(0,0),fx=.33,fy=.33)
+	frameRGB = cv2.cvtColor(frameSmall, cv2.COLOR_BGR2RGB)
+
+	facePositions = face_recognition.face_locations(frameRGB,model='cnn')
+	allEncodings=face_recognition.face_encodings(frameRGB,facePositions)
+	for (top, right, bottom, left), face_encoding in zip(facePositions, allEncodings):
+		name = 'Unknown Person'
+
+		matches = face_recognition.compare_faces(Encodings, face_encoding)
+
+		if True in matches:
+			first_match_index = matches.index(True)
+			name = Names[first_match_index]
+			if name and j == 1:
+				text = f'Well hello {name}, My name is Mr. Roboto'
+				speak(text)
+				j -= 1
+		top = top*3
+		right = right * 3
+		bottom = bottom * 3
+		left = left * 3
+		
+		cv2.rectangle(frame,(left,top),(right,bottom),(0,0,255),2)
+		objX = (right + left) /2 #center x object
+		objY = (bottom + top) /2 # center y object
+		errorX = objX - (width /2)
+		errorY = objY - (height / 2)
+
+		if abs(errorX)>15:
+			pan = pan-errorX/40
+
+		if abs(errorY)>15:
+				tilt = tilt + errorY/40
+
+		if pan >180:
+			pan = 180
+		if pan < 0:
+			pan = 0
+
+		if tilt > 180:
+			tilt = 180
+		if tilt < 0:
+			tilt = 0    
+
+
+		kit.servo[0].angle = pan
+		kit.servo[1].angle =tilt
+			
+
+		
+			
+		cv2.putText(frame,name,(left,top-6),font,.75,(255,0,0),2)
+		
+	cv2.imshow('Window',frame)
+	cv2.moveWindow('Window',0,0)
+
+	
+	
+	if cv2.waitKey(0) == ord('q'):
+		break
+cam.release()
+cv2.destroyAllWindows()
+	
+	
+	
+</code></pre>		
+
+
+							</section>
+
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+					<section>
+						<form method="post" action="#">
+							<div class="fields">
+								<div class="field">
+									<label for="name">Name</label>
+									<input type="text" name="name" id="name" />
+								</div>
+								<div class="field">
+									<label for="email">Email</label>
+									<input type="text" name="email" id="email" />
+								</div>
+								<div class="field">
+									<label for="message">Message</label>
+									<textarea name="message" id="message" rows="3"></textarea>
+								</div>
+							</div>
+							<ul class="actions">
+								<li><input type="submit" value="Send Message" /></li>
+							</ul>
+						</form>
+					</section>
+					<section class="split contact">
+						<section class="alt">
+							<h3>Address</h3>
+							<p>Menlo Park, CA 94025</p>
+						</section>
+						<section>
+							<h3>Phone</h3>
+							<p><a href="#">(614) 769-2450</a></p>
+						</section>
+						<section>
+							<h3>Email</h3>
+							<p><a href="#">JohnLKostas@gmail.com</a></p>
+						</section>
+						<section>
+							<h3>Social</h3>
+							<ul class="icons alt">
+								<li><a target = "_blank" rel = "noopener nonreferrer" href = "https://github.com/Bobaswett/" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			
+	</body>
+</html>

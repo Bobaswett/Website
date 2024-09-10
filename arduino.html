@@ -1,0 +1,479 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Generic Page - Massively by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="assets/css/custom.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+
+   
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+
+    
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+		
+		
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">John Kostas</a>
+					</header>
+
+				<!-- Nav -->
+				<nav id="nav">
+					<ul class="links">
+						<li><a href="index.html">Home</a></li>
+					
+						
+						<li class="dropdown">
+							<a href="#main">Projects</a>
+							<ul class="dropdown-content">
+								<li><a href="4wheeled.html">4-Wheel Hand gestures</a></li>
+								<li><a href="nlp.html">Article NLP</a></li>
+								<li><a href="alz.html">Alzheimers Prediction</a></li>
+								<li><a href="facetrack.html">4 Wheel Face Tracking</a></li>
+								<li><a href="jetson.html">Jetson Nano Mini Projects</a></li>
+								<li><a href="arduino.html">Esp32/Arduino Mini Projects</a></li>
+								<li><a href="website.html">This Website</a></li>
+							</ul>
+						
+						</li>
+						<li><a href="about.html">Professional Experience</a></li>
+					</ul>
+					<ul class="icons">
+						<li><a target = "_blank" rel = "noopener nonreferrer" href = "https://github.com/Bobaswett/" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">2021-2024</span>
+									<h1>Arduino and ESP32 projects written primarily in C++<br />
+										<li><a target = "_blank" rel = "noopener nonreferrer" href = "https://github.com/Bobaswett/Arduino-mini-projects" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+									</h1>
+									<p>This robot was made using a Jetson Nano and Arduino Nano that communicate through a UART connection. The Jetson Nano is also equipped with Servos that move the camera to track the user's face. The Servos are controlled by a PWM board through an I2C connection from the Jetson Nano.</p>
+								</header>
+	
+								<h2>Basic Servo Movement Program</h2>
+<pre><code class="language-cpp">
+#include ESP32Servo.h
+
+	Servo servo;
+	
+	void setup() 
+	{
+		servo.attach(22);
+		servo.write(0);
+		delay(2000);
+		ender();
+	}
+	
+	void ender()
+	{
+		for(int i = 0; i < 180; i++)
+		{
+		servo.write(i);
+		delay(10);
+		}
+		for(int i = 180; i > 0; i--)
+		{
+		servo.write(i);
+		delay(10);
+		} 
+	}
+
+	
+	
+	
+</code></pre>
+
+<h2>LED Blink Program</h2>
+<pre><code class="language-cpp">
+int led_go = 33;
+
+
+void setup() {
+	
+	pinMode(led_go, OUTPUT);
+}
+
+void loop() {
+	
+	digitalWrite(led_go, HIGH);   // turn the LED on (HIGH is the voltage level)
+	delay(1000);                       // wait for a second
+	digitalWrite(led_go, LOW);    // turn the LED off by making the voltage LOW
+	delay(1000);                       // wait for a second
+}
+
+	
+	
+	
+</code></pre>
+
+<h2>Sonar with ESP32</h2>
+<pre><code class="language-cpp">
+
+const int trigPin = 5;
+const int echoPin = 18;
+const int green = 33;
+const int red = 32;
+#define SOUND_SPEED 0.034
+
+long duration;
+float distanceCm;
+
+
+
+
+void setup() 
+{
+	Serial.begin(115200);
+	pinMode(trigPin, OUTPUT);
+	pinMode(echoPin, INPUT);
+	pinMode(green, OUTPUT);
+	pinMode(red, OUTPUT);
+}
+
+void loop() 
+{
+	digitalWrite(trigPin, LOW);
+	delayMicroseconds(2);
+
+	digitalWrite(trigPin, HIGH);
+	delayMicroseconds(10);
+	digitalWrite(trigPin, LOW);
+
+	duration = pulseIn(echoPin, HIGH);
+	
+	
+	distanceCm = duration * SOUND_SPEED/2;
+	
+	if(distanceCm < 15)
+	{
+		digitalWrite(red, HIGH);   
+		digitalWrite(green,LOW);
+		delay(5);                       
+							
+	}
+	else if(distanceCm > 15)
+	{
+		digitalWrite(green, HIGH);   
+		digitalWrite(red, LOW);
+		delay(5);                       
+							
+	}
+}
+
+	
+	
+	
+</code></pre>
+
+
+<h2>Quadruped Robot Preparation Code</h2>
+<pre><code class="language-cpp">
+
+
+#include ESP32Servo.h
+	Servo servo1;
+	Servo servo2;
+	Servo servo3;
+	Servo servo4;
+	Servo servo5;
+	Servo servo6;
+	Servo servo7;
+	Servo servo8;
+	Servo servo9;
+	Servo servo10;
+	Servo servo11;
+	Servo servo12;
+	
+	
+	void setup()
+	{
+	  servo1.attach(22);
+	  servo1.write(90);
+	  delay(1000);
+	  
+	  servo2.attach(23);
+	  servo2.write(90);
+	  delay(1000);
+	  
+	  servo3.attach(21);
+	  servo3.write(90);
+	  delay(1000);
+	  
+	  servo4.attach(19);
+	  servo4.write(90);
+	  delay(1000);
+	
+	  servo5.attach(18);
+	  servo5.write(90);
+	  delay(1000);
+	
+	  servo6.attach(4);
+	  servo6.write(90);
+	  delay(1000);
+	
+	  servo7.attach(2);
+	  servo7.write(90);
+	  delay(1000);
+	 
+	  servo8.attach(5);
+	  servo8.write(90);
+	  delay(1000);
+	
+	  servo9.attach(17);
+	  servo9.write(180);
+	  delay(1000);
+	  
+	  servo10.attach(32);
+	  servo10.write(0);
+	  delay(1000);
+	
+	  servo11.attach(33);
+	  servo11.write(180);
+	  delay(1000);
+	  
+	  servo12.attach(16);
+	  servo12.write(0);
+	  delay(1000);
+	
+	
+	}
+	void loop()
+	{
+	  
+	
+	
+	}
+
+	
+	
+	
+</code></pre>
+
+<h2>Mapping an RC Motor to a PS3 Controller</h2>
+<pre><code class="language-cpp">
+
+
+#include PS4Controller.h
+#include ESP32Servo.h
+Servo servo;
+
+
+void setup()
+{
+	Serial.begin(115200);
+	
+	PS4.begin("sdgfadggdasdg");
+	Serial.println("Initialization ready!");
+
+
+	servo.attach(23);
+	servo.write(90);
+	
+	
+	if(PS4.isConnected()) 
+	{
+	Serial.println("Controller connected");
+	}  
+	delay(250);
+}
+
+int val = 0;
+
+void loop()
+{
+	
+	val = PS4.data.analog.stick.ly;
+	val = map(val, -128, 170, 0, 180);
+	
+	if (PS4.event.analog_move.stick.ly)
+	{
+	servo.write(val);
+	delay(100);
+	}
+
+
+}
+
+	
+	
+	
+</code></pre>
+
+<h2>Transmitter for RC Plane (Flight Controller)</h2>
+<pre><code class="language-cpp">
+
+
+#include SPI.h
+#include nRF24L01.h
+#include RF24.h
+#include Ps3Controller.h
+
+
+RF24 radio(16, 17); // CE, CSN
+
+const byte address[6] = "00001";
+
+void setup() {
+	Serial.begin(115200);
+	
+	Ps3.begin("00:13:a9:df:29:14");
+	
+	Serial.println("Initialization ready!");
+	
+	radio.begin();
+	radio.openWritingPipe(address);
+	radio.setPALevel(RF24_PA_MIN);
+	radio.stopListening();
+}
+int val = 0;
+void loop() {
+	
+	
+	
+	val = (Ps3.data.analog.stick.ly);
+	val = map(val, -18, -134, 0, 180);
+	radio.write(&val, sizeof(val));
+	delay(100);
+}
+
+
+	
+	
+</code></pre>
+
+<h2>Receiver for RC Plane (Onboard)</h2>
+<pre><code class="language-cpp">
+
+
+#include SPI.h
+#include nRF24L01.h
+#include RF24.h
+#include ESP32Servo.h
+Servo motor;               
+
+RF24 radio(16, 17); // CE, CSN
+
+const byte address[6] = "00001";                              
+
+void setup() {
+	
+	Serial.begin(115200);
+	radio.begin();
+	radio.openReadingPipe(0, address);
+	radio.setPALevel(RF24_PA_MIN);
+	radio.startListening();
+	motor.attach(22);
+	motor.write(0);
+	
+}
+
+void loop() {
+	if (radio.available()) {
+	while (radio.available()){
+		int val = 0;
+		radio.read(&val, sizeof(val));
+		motor.write(val);
+		delay(100);
+		//Serial.println(val, DEC);
+	
+	
+	}
+}  
+}
+
+
+	
+</code></pre>
+
+
+
+							</section>
+
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+					<section>
+						<form method="post" action="#">
+							<div class="fields">
+								<div class="field">
+									<label for="name">Name</label>
+									<input type="text" name="name" id="name" />
+								</div>
+								<div class="field">
+									<label for="email">Email</label>
+									<input type="text" name="email" id="email" />
+								</div>
+								<div class="field">
+									<label for="message">Message</label>
+									<textarea name="message" id="message" rows="3"></textarea>
+								</div>
+							</div>
+							<ul class="actions">
+								<li><input type="submit" value="Send Message" /></li>
+							</ul>
+						</form>
+					</section>
+					<section class="split contact">
+						<section class="alt">
+							<h3>Address</h3>
+							<p>Menlo Park, CA 94025</p>
+						</section>
+						<section>
+							<h3>Phone</h3>
+							<p><a href="#">(614) 769-2450</a></p>
+						</section>
+						<section>
+							<h3>Email</h3>
+							<p><a href="#">JohnLKostas@gmail.com</a></p>
+						</section>
+						<section>
+							<h3>Social</h3>
+							<ul class="icons alt">
+								<li><a target = "_blank" rel = "noopener nonreferrer" href = "https://github.com/Bobaswett/" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			
+	</body>
+</html>
